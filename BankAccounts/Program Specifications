@@ -1,0 +1,72 @@
+Using polymorphism:
+For Saving​class
+● when call deposit function, a new amount (can be zero) will be added to the
+current balance along with the interest from the original balance
+● when call withdraw function, check if the amount is valid (cannot exceed the
+current balance)
+For Checking​class
+● when call deposit function, a new amount (cannot be zero) will be added to the
+current balance; a transaction fee will be subtracted from the balance.
+● when call withdraw function, check if the amount is valid (cannot exceed the
+current balance minus the transaction fee); withdraw the amount and subtract the
+transaction fee from the balance.
+When making the bank accounts, the account numbers will be the random 4­digit integers; the
+initial balances will be the random double value between $0 and $100.00; the account type will
+be either saving or checking.
+The interest rate will be 0.01 for all saving accounts. The transaction rate will be $0.50 for all
+checking account. Start the program by making 5 random accounts. The following is the sample
+inputs and outputs
+Select the following options
+1. Add new account
+2. Deposit to an account
+3. Withdraw from an account
+4. Print all accounts
+5. Quit 4
+Account number Type Balance
+1123 Saving 23.45
+5432 Checking 54.65
+7421 Checking 87.34
+2376 Saving 65.76
+5341 Checking 65.34
+Select the following options
+1. Add new account
+2. Deposit to an account
+3. Withdraw from an account
+4. Print all accounts
+5. Quit 1
+Enter account number: 1111
+Enter account type: Saving
+Enter account balance: 123
+Account number Type Balance
+1123 Saving 23.45
+5432 Checking 54.65
+7421 Checking 87.34
+2376 Saving 65.76
+5341 Checking 65.34
+1111 Saving 123.00
+Select the following options
+1. Add new account
+2. Deposit to an account
+3. Withdraw from an account
+4. Print all accounts
+5. Quit 2
+Enter account number: 2376
+Enter amount: 50
+Deposit $50.00 to Saving account 2376, the new balance is $116.41
+Select the following options
+1. Add new account
+2. Deposit to an account
+3. Withdraw from an account
+4. Print all accounts
+5. Quit 3
+Enter account number: 7421
+Enter amount: 50
+Withdraw $50 from Checking account 7421, the new balance is $36.84
+Select the following options
+1. Add new account
+2. Deposit to an account
+3. Withdraw from an account
+4. Print all accounts
+5. Quit 5
+Program terminated
+Note: the sample inputs/outputs is not complete for all cases
