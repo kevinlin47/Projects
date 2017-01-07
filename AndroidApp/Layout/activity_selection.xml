@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    tools:context="nivek.learnnumbersmore.SelectionActivity">
+
+    <android.support.design.widget.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:theme="@style/AppTheme.AppBarOverlay"
+        android:background="@android:color/black">
+
+    </android.support.design.widget.AppBarLayout>
+
+    <include layout="@layout/content_start"
+        android:id="@+id/include" />
+
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:src="@drawable/field"
+        android:id="@+id/imageView"
+        android:scaleType="fitXY"
+        />
+
+    <Button
+        android:text="Shapes"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/shapeButton"
+        app:layout_anchor="@+id/imageView"
+        android:background="@android:color/holo_red_dark"
+        android:textColor="@android:color/background_light"
+        app:layout_anchorGravity="top|center_horizontal"
+        android:layout_gravity="bottom|center_horizontal"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true" />
+
+    <Button
+        android:text="Numbers"
+        android:id="@+id/numbButton"
+        app:layout_anchor="@+id/imageView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_anchorGravity="center_vertical|center_horizontal"
+        android:layout_gravity="top|center_horizontal"
+        android:background="@android:color/holo_red_dark"
+        android:textColor="@android:color/background_light"
+        android:layout_marginBottom="79dp"
+        android:layout_above="@+id/aniButton"
+        android:layout_alignLeft="@+id/shapeButton"
+        android:layout_alignStart="@+id/shapeButton" />
+
+    <Button
+        android:text="Animals"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="37dp"
+        android:id="@+id/aniButton"
+        android:textColor="@android:color/background_light"
+        android:background="@android:color/holo_red_dark"
+        android:layout_below="@+id/shapeButton"
+        android:layout_alignLeft="@+id/shapeButton"
+        android:layout_alignStart="@+id/shapeButton" />
+
+</RelativeLayout>
+
