@@ -1,0 +1,4 @@
+Running the QuizCardBuilder.java class well let you create a new set of flash cards. Once you are satisfied you can then save the 
+set of cards to a location on your computer. 
+
+Running the QuizCardPlayer.java class well let you load a saved set of cards and play with it. 
