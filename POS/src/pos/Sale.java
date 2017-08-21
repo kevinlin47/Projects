@@ -54,10 +54,16 @@ public class Sale implements ActionListener{
     JButton totalButton;
     JButton cancelButton;
     JButton removeButton;
+    JButton exactButton;
+    JButton ceilButton;
+    JButton fiveButton;
+    JButton tenButton;
+    JButton twentyButton;
+    JButton backButton;
+    JButton clearButton;
     JList orderList;
     JLabel totalDisplay;
-    JLabel amountEnteredLabel;
-    JTextField enteredAmount;
+    JLabel enteredAmount;
     DefaultListModel dlm;
     ArrayList drinksList;
     ArrayList sidesList;
@@ -226,15 +232,7 @@ public class Sale implements ActionListener{
        mainFrame.setVisible(true);
        
        //Create Transaction Panel
-                  /*int top = 20;
-           int left = 10;
-           int bottom = 2;
-           int right = 30;
-           gbc.insets = new Insets(top, left, bottom, right);
-           gridBagLayout.setConstraints(component, gbc);
-           buttonPanel.add(component,gbc);*/
        chargePanel=new JPanel();
-       chargePanel.setLayout(gridBagLayout);
        totalDisplay=new JLabel("Test");
        totalDisplay.setFont(new Font("Courier New", Font.PLAIN, 32));
        totalDisplay.setOpaque(true);
@@ -242,17 +240,76 @@ public class Sale implements ActionListener{
        totalDisplay.setBackground(Color.BLACK);
        JLabel totalLabel=new JLabel("Total: ");
        totalLabel.setFont(new Font("Courier New",Font.PLAIN,28));
-       chargePanel.add(totalLabel,gbc);
-       chargePanel.add(totalDisplay,gbc);
-       amountEnteredLabel=new JLabel("Amount: ");
-       amountEnteredLabel.setFont(new Font("Courier New",Font.PLAIN,28));
-       chargePanel.add(amountEnteredLabel,gbc);
-       
-       
+       chargePanel.add(totalLabel);
+       chargePanel.add(totalDisplay);
+
        JButton chargeCancel=new JButton("Cancel");
        chargeCancel.addActionListener(new ChargeCancelListener());
+       enteredAmount=new JLabel("0.00");
+       enteredAmount.setFont(new Font("Courier New", Font.PLAIN,32));
+       enteredAmount.setForeground(Color.GREEN);
+       enteredAmount.setBackground(Color.BLACK);
+       enteredAmount.setOpaque(true);
+       backButton=new JButton("←");
        numberPanel=new JPanel();
-       numberPanel.add(chargeCancel);
+       numberPanel.setLayout(gridBagLayout);
+       
+       //place number buttons onto panel
+       int x=4;
+       int y=1;
+       
+       for (int i=9;i>0;--i)
+       {    
+           if(i==6 || i==3 || i==0)
+           {
+               ++y;
+               x=4;
+           }
+           gbc.gridx=x;
+           gbc.gridy=y;
+           
+           JButton dynamicButton=new JButton(String.valueOf(i));
+           numberPanel.add(dynamicButton,gbc);
+           --x;
+           
+       }
+       
+       //Buttons with set payment amounts
+       exactButton=new JButton("Cash \n (Exact)"); //exact amount equal to total
+       ceilButton=new JButton(); //total amount ceilded
+       fiveButton=new JButton("$5"); //5$
+       tenButton=new JButton("$10"); //10$
+       twentyButton=new JButton("$20"); //20$
+       
+       gbc.gridx=0;
+       gbc.gridy=0;
+       numberPanel.add(twentyButton,gbc);
+       gbc.gridy=1;
+       numberPanel.add(tenButton,gbc);
+       gbc.gridy=2;
+       numberPanel.add(fiveButton,gbc);
+       gbc.gridy=3;
+       numberPanel.add(ceilButton,gbc);
+       gbc.gridy=4;
+       numberPanel.add(exactButton,gbc);
+       gbc.gridx=2;
+       gbc.gridy=0;
+       numberPanel.add(enteredAmount,gbc);
+       gbc.gridx=3;
+       numberPanel.add(backButton,gbc);
+       
+       gbc.gridx=2;
+       gbc.gridy=4;
+       clearButton=new JButton("Clear");
+       numberPanel.add(clearButton,gbc);
+       gbc.gridx=3;
+       JButton zeroButton=new JButton("0");
+       numberPanel.add(zeroButton,gbc);
+       gbc.gridx=4;
+       numberPanel.add(chargeCancel,gbc);
+       
+      
+       
        
 
        
@@ -347,6 +404,7 @@ public class Sale implements ActionListener{
             
             String amountToDisplay=String.format("%.2f",total);
             totalDisplay.setText(amountToDisplay);
+            ceilButton.setText("$"+String.valueOf((int)Math.ceil(total)));
             
         }
     }
