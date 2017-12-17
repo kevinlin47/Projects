@@ -25,14 +25,18 @@ public class ManageUser {
     JFrame manageUserFrame;
     JFrame newUserFrame;
     JFrame removeUserFrame;
+    JFrame staffFrame;
     JPanel optionsPanel;
     JButton addUserButton;
     JButton removeUserButton;
-    JButton cancelButton;
+    JButton viewStaffButton;
     JButton returnHomeButton;
     JTextField newUserID;
     JTextField newUserPassword;
+    JTextField newUserName;
+    JTextField newUserRole;
     JTextField removeID;
+    JTable staffTable;
     
     public void go()
     {   
@@ -40,13 +44,13 @@ public class ManageUser {
         manageUserFrame=new JFrame("POS System v 1.0");
         addUserButton=new JButton("Add New User");
         removeUserButton=new JButton("Remove a User");
-        cancelButton=new JButton("Cancel");
+        viewStaffButton=new JButton("View Staff");
         returnHomeButton=new JButton("Return Home");
         optionsPanel=new JPanel();
-        cancelButton.addActionListener(new CancelListener());
         returnHomeButton.addActionListener(new ReturnHomeListener());
         addUserButton.addActionListener(new AddUserListener());
         removeUserButton.addActionListener(new RemoveUserListener());
+        viewStaffButton.addActionListener(new ViewStaffListener());
         
         GridBagLayout gridBagLayout=new GridBagLayout();
         optionsPanel.setLayout(gridBagLayout);
@@ -62,7 +66,7 @@ public class ManageUser {
         gbc.gridy=3;
         optionsPanel.add(Box.createVerticalStrut(12),gbc);
         gbc.gridy=4;
-        optionsPanel.add(cancelButton,gbc);
+        optionsPanel.add(viewStaffButton,gbc);
         gbc.gridy=5;
         optionsPanel.add(Box.createVerticalStrut(12),gbc);
         gbc.gridy=6;
@@ -76,6 +80,67 @@ public class ManageUser {
         manageUserFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         manageUserFrame.setVisible(true);
         
+        //View Staff GUI Code
+        staffFrame=new JFrame("Staff");
+        staffFrame.setResizable(false);
+        staffFrame.setSize(800,800);
+        staffFrame.setLocationRelativeTo(null);
+        
+        
+        try{
+            int rowCount=0;
+            
+            Connection conn=DriverManager.getConnection("jdbc:mysql://newkevinlindb.cul7akmhbeku.us-west-2.rds.amazonaws.com:3306/posUsers_DB","root","Restinpeace1");
+            Statement st=conn.createStatement();
+            
+            ResultSet rs=st.executeQuery("SELECT COUNT(*) FROM employees");
+            
+            while(rs.next())
+            {
+                rowCount=rs.getInt(1);
+            }
+            
+            rs.close();
+            
+            staffTable=new JTable(rowCount+1,4);
+            staffFrame.getContentPane().add(BorderLayout.CENTER,staffTable);
+            
+            JButton closeButton=new JButton("CLOSE");
+            staffFrame.getContentPane().add(BorderLayout.SOUTH,closeButton);
+            closeButton.addActionListener(new ActionListener()
+                    {
+                        @Override public void actionPerformed(ActionEvent ev)
+                        {
+                            staffFrame.dispose();
+                            manageUserFrame.setVisible(true);
+                        }
+                    });
+            
+            staffTable.setValueAt("ID",0,0);
+            staffTable.setValueAt("PASSWORD",0,1);
+            staffTable.setValueAt("NAME",0,2);
+            staffTable.setValueAt("POSITION",0,3);
+            
+            rs=st.executeQuery("Select * from employees");
+            int row=1;
+            int col=0;
+            
+            while(rs.next())
+            {   
+                    staffTable.setValueAt(rs.getString(1),row,0);
+                    staffTable.setValueAt(rs.getString(2), row,1);
+                    staffTable.setValueAt(rs.getString(3), row,2);
+                    staffTable.setValueAt(rs.getString(4), row,3);
+                    ++row;
+                
+            }
+            
+        }catch (SQLException ex)
+        {
+            Logger.getLogger(POS.class.getName()).log(java.util.logging.Level.SEVERE,null,ex);
+        }
+        
+        
         //New User GUI Code
         newUserFrame=new JFrame("New User");
         newUserFrame.setLayout(gridBagLayout);
@@ -83,7 +148,13 @@ public class ManageUser {
         JButton cancelAdd=new JButton("Cancel");
         submitToAdd.addActionListener(new SubmitAddListener());
         cancelAdd.addActionListener(new CancelAddListener());
+        newUserName=new JTextField(20);
+        newUserRole=new JTextField(20);
         newUserID=new JTextField(10);
+        newUserName.setText("");
+        JLabel newUserNameLabel=new JLabel("New User NM: ");
+        newUserRole.setText("");
+        JLabel newUserRoleLabel=new JLabel("New User RL: ");
         newUserID.setText("");
         JLabel newUserIDLabel=new JLabel("New User ID: ");
         newUserPassword=new JTextField(10);
@@ -91,16 +162,26 @@ public class ManageUser {
         JLabel newUserPasswordLabel=new JLabel("New User PW: ");
         gbc.gridx=0;
         gbc.gridy=0;
+        newUserFrame.add(newUserNameLabel,gbc);
+        gbc.gridx=1;
+        newUserFrame.add(newUserName,gbc);
+        gbc.gridx=0;
+        gbc.gridy=1;
+        newUserFrame.add(newUserRoleLabel,gbc);
+        gbc.gridx=1;
+        newUserFrame.add(newUserRole,gbc);
+        gbc.gridx=0;
+        gbc.gridy=2;
         newUserFrame.add(newUserIDLabel,gbc);
         gbc.gridx=1;
         newUserFrame.add(newUserID,gbc);
         gbc.gridx=0;
-        gbc.gridy=1;
+        gbc.gridy=3;
         newUserFrame.add(newUserPasswordLabel,gbc);
         gbc.gridx=1;
         newUserFrame.add(newUserPassword,gbc);
+        gbc.gridy=4;
         gbc.gridx=0;
-        gbc.gridy=2;
         newUserFrame.add(submitToAdd,gbc);
         gbc.gridx=1;
         newUserFrame.add(cancelAdd,gbc);
@@ -132,28 +213,16 @@ public class ManageUser {
         
         removeUserFrame.setSize(300,300);
         removeUserFrame.setLocationRelativeTo(null);
-        removeUserFrame.setResizable(false);
+        removeUserFrame.setResizable(false);      
         
-        
-        
-        
-    }
-    
-    
-    public class CancelListener implements ActionListener
-    {
-        public void actionPerformed(ActionEvent ev)
-        {
-            manageUserFrame.dispose();
-            Manage m=new Manage();
-            m.go();
-        }
     }
     
     public class CancelAddListener implements ActionListener
     {
         public void actionPerformed(ActionEvent ev)
         {   
+            newUserName.setText("");
+            newUserRole.setText("");
             newUserID.setText("");
             newUserPassword.setText("");
             newUserFrame.dispose();
@@ -176,9 +245,9 @@ public class ManageUser {
         {   
             boolean success=false;
             
-            if (newUserID.getText().equals("") || newUserPassword.getText().equals(""))
+            if (newUserID.getText().equals("") || newUserPassword.getText().equals("") || newUserRole.getText().equals("") || newUserName.getText().equals(""))
             {
-                JOptionPane.showMessageDialog(null,"One or both fields is empty");
+                JOptionPane.showMessageDialog(null,"One or multiple fields are empty");
                 return;
             }
             
@@ -186,7 +255,7 @@ public class ManageUser {
             {   
                 boolean found=false;
                 
-                Connection conn=DriverManager.getConnection("jdbc:mysql://kevinlindb.cul7akmhbeku.us-west-2.rds.amazonaws.com:3306/posUsers_DB","root","password");
+                Connection conn=DriverManager.getConnection("jdbc:mysql://newkevinlindb.cul7akmhbeku.us-west-2.rds.amazonaws.com:3306/posUsers_DB","root","Restinpeace1");
                 Statement st=conn.createStatement();
                 ResultSet rs=st.executeQuery("Select * from employees");
                 
@@ -204,11 +273,13 @@ public class ManageUser {
                     newUserFrame.dispose();
                     newUserID.setText("");
                     newUserPassword.setText("");
+                    newUserRole.setText("");
+                    newUserName.setText("");
                     return;
                 }
                 else
                 {
-                    String sqlStatement="INSERT INTO `posUsers_DB`.`employees` (`id`, `password`) VALUES ('"+newUserID.getText()+"', '"+newUserPassword.getText()+"')";
+                    String sqlStatement="INSERT INTO `posUsers_DB`.`employees` (`id`, `password`, `name`, `position`) VALUES ('"+newUserID.getText()+"', '"+newUserPassword.getText()+"','"+newUserName.getText()+"','"+newUserRole.getText()+"')";
                     st.executeUpdate(sqlStatement);
                     success=true;
                 }
@@ -222,6 +293,9 @@ public class ManageUser {
             {
                 JOptionPane.showMessageDialog(null,"User Added Successfully");
                 newUserFrame.dispose();
+                manageUserFrame.dispose();
+                ManageUser manageUser=new ManageUser();
+                manageUser.go();
             }
             else
             {
@@ -246,7 +320,7 @@ public class ManageUser {
             {   
                 boolean found=false;
                 
-                Connection conn=DriverManager.getConnection("jdbc:mysql://kevinlindb.cul7akmhbeku.us-west-2.rds.amazonaws.com:3306/posUsers_DB","root","password");
+                Connection conn=DriverManager.getConnection("jdbc:mysql://newkevinlindb.cul7akmhbeku.us-west-2.rds.amazonaws.com:3306/posUsers_DB","root","Restinpeace1");
                 Statement st=conn.createStatement();
                 ResultSet rs=st.executeQuery("Select * from employees");
                 
@@ -265,6 +339,9 @@ public class ManageUser {
                     JOptionPane.showMessageDialog(null,"User has been removed");
                     removeUserFrame.dispose();
                     removeID.setText("");
+                    manageUserFrame.dispose();
+                    ManageUser manageUser=new ManageUser();
+                    manageUser.go();
                     return;
                 }
                 else
@@ -304,6 +381,15 @@ public class ManageUser {
         {
             removeUserFrame.setVisible(true);
             removeUserFrame.requestFocus();
+        }
+    }
+    
+    public class ViewStaffListener implements ActionListener
+    {
+        public void actionPerformed(ActionEvent ev)
+        {   
+            manageUserFrame.dispose();
+            staffFrame.setVisible(true);
         }
     }
     

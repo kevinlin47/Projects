@@ -14,6 +14,7 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowEvent;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -31,7 +32,6 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JTextField;
 import javax.swing.ListModel;
 
 
@@ -41,18 +41,24 @@ import javax.swing.ListModel;
  */
 public class Sale implements ActionListener{
     JFrame mainFrame;
+    JFrame changeFrame;
     JLabel drinksLabel;
     JLabel sidesLabel;
     JLabel extrasLabel;
     JLabel sandwichLabel;
+    JLabel changeDisplay;
+    JLabel changeLabel;
     JPanel salePanel;
     JPanel orderPanel;
     JPanel buttonPanel;
     JPanel chargePanel;
     JPanel numberPanel;
     JPanel tempPanel;
+    JPanel changePanel;
+    JPanel sandwichPanel;
     JButton totalButton;
     JButton cancelButton;
+    JButton chargeCancel;
     JButton removeButton;
     JButton exactButton;
     JButton ceilButton;
@@ -61,6 +67,7 @@ public class Sale implements ActionListener{
     JButton twentyButton;
     JButton backButton;
     JButton clearButton;
+    JButton cashButton;
     JList orderList;
     JLabel totalDisplay;
     JLabel enteredAmount;
@@ -68,17 +75,25 @@ public class Sale implements ActionListener{
     ArrayList drinksList;
     ArrayList sidesList;
     ArrayList extrasList;
+    ArrayList sandwichList;
     HashMap itemPrices;
+    Thread a;
+    Thread b;
     double total;
+    String [] amount=new String [10];
+    boolean saladActive=false;
+    volatile boolean shutdown=false;
+    volatile boolean transactionComplete=false;
     
     public void go ()
     {  
        drinksList=new ArrayList<String>();
        sidesList=new ArrayList<String>();
        extrasList=new ArrayList<String>();
+       sandwichList=new ArrayList<String>();
        
        itemPrices=new HashMap();
-       
+
 
         
         
@@ -91,7 +106,7 @@ public class Sale implements ActionListener{
        sandwichLabel=new JLabel("Sandwiches/etc");
        orderList=new JList(dlm);
        orderList.setVisible(true);
-       orderList.setFixedCellWidth(125);
+       orderList.setFixedCellWidth(140);
        orderList.setFixedCellHeight(25);
        orderList.setBackground(Color.WHITE);
        JScrollPane orderScrollPane=new JScrollPane(orderList);
@@ -135,7 +150,7 @@ public class Sale implements ActionListener{
                
        //Connect to MySql table for menu item information
        try{
-        Connection conn=DriverManager.getConnection("jdbc:mysql://kevinlindb.cul7akmhbeku.us-west-2.rds.amazonaws.com:3306/posUsers_DB","root","password");
+        Connection conn=DriverManager.getConnection("jdbc:mysql://newkevinlindb.cul7akmhbeku.us-west-2.rds.amazonaws.com:3306/posUsers_DB","root","Restinpeace1");
         Statement st=conn.createStatement();
         ResultSet rs=st.executeQuery("select * from items");
         
@@ -152,12 +167,18 @@ public class Sale implements ActionListener{
                 sidesList.add(rs.getString(1));
                 itemPrices.put(rs.getString(1),rs.getString(2));
             }
-            else
+            else if (rs.getString(3).equals("extras"))
             {
                 extrasList.add(rs.getString(1)); 
                 itemPrices.put(rs.getString(1),rs.getString(2));
             }
+            else if (rs.getString(3).equals("sandwich"))
+            {
+                sandwichList.add(rs.getString(1));
+                itemPrices.put(rs.getString(1),rs.getString(2));
+            }
         }
+        
         
        } catch (SQLException ex)
        {
@@ -211,7 +232,9 @@ public class Sale implements ActionListener{
        }
        
        JButton sandwichButton=new JButton("Sandwich");
+       sandwichButton.addActionListener(new SandwichListener());
        JButton saladButton=new JButton("Salad");
+       saladButton.addActionListener(new SaladListener());
        int top = 20;
        int left = 30;
        int bottom = 2;
@@ -233,7 +256,7 @@ public class Sale implements ActionListener{
        
        //Create Transaction Panel
        chargePanel=new JPanel();
-       totalDisplay=new JLabel("Test");
+       totalDisplay=new JLabel("0.00");
        totalDisplay.setFont(new Font("Courier New", Font.PLAIN, 32));
        totalDisplay.setOpaque(true);
        totalDisplay.setForeground(Color.GREEN);
@@ -243,7 +266,7 @@ public class Sale implements ActionListener{
        chargePanel.add(totalLabel);
        chargePanel.add(totalDisplay);
 
-       JButton chargeCancel=new JButton("Cancel");
+       chargeCancel=new JButton("Cancel");
        chargeCancel.addActionListener(new ChargeCancelListener());
        enteredAmount=new JLabel("0.00");
        enteredAmount.setFont(new Font("Courier New", Font.PLAIN,32));
@@ -251,6 +274,7 @@ public class Sale implements ActionListener{
        enteredAmount.setBackground(Color.BLACK);
        enteredAmount.setOpaque(true);
        backButton=new JButton("←");
+       backButton.addActionListener(new BackListener());
        numberPanel=new JPanel();
        numberPanel.setLayout(gridBagLayout);
        
@@ -269,6 +293,7 @@ public class Sale implements ActionListener{
            gbc.gridy=y;
            
            JButton dynamicButton=new JButton(String.valueOf(i));
+           dynamicButton.addActionListener(new NumberListener());
            numberPanel.add(dynamicButton,gbc);
            --x;
            
@@ -276,10 +301,18 @@ public class Sale implements ActionListener{
        
        //Buttons with set payment amounts
        exactButton=new JButton("Cash \n (Exact)"); //exact amount equal to total
+       exactButton.addActionListener(new ExactListener());
        ceilButton=new JButton(); //total amount ceilded
+       ceilButton.addActionListener(new CeilListener());
        fiveButton=new JButton("$5"); //5$
+       fiveButton.addActionListener(new FiveListener());
        tenButton=new JButton("$10"); //10$
+       tenButton.addActionListener(new TenListener());
        twentyButton=new JButton("$20"); //20$
+       twentyButton.addActionListener(new TwentyListener());
+       cashButton=new JButton("Cash");
+       cashButton.addActionListener(new CashListener());
+       cashButton.setEnabled(false);
        
        gbc.gridx=0;
        gbc.gridy=0;
@@ -297,36 +330,103 @@ public class Sale implements ActionListener{
        numberPanel.add(enteredAmount,gbc);
        gbc.gridx=3;
        numberPanel.add(backButton,gbc);
+       gbc.gridx=4;
+       JButton chargeRemove=new JButton("Remove");
+       chargeRemove.addActionListener(new removeListener());
+       numberPanel.add(chargeRemove,gbc);
        
        gbc.gridx=2;
        gbc.gridy=4;
        clearButton=new JButton("Clear");
+       clearButton.addActionListener(new ClearListener());
        numberPanel.add(clearButton,gbc);
        gbc.gridx=3;
        JButton zeroButton=new JButton("0");
+       zeroButton.addActionListener(new NumberListener());
        numberPanel.add(zeroButton,gbc);
        gbc.gridx=4;
        numberPanel.add(chargeCancel,gbc);
+       gbc.gridx=2;
+       gbc.gridy=5;
+       numberPanel.add(cashButton,gbc);
        
-      
-       
-       
+       //GUI Code for Change Display
+       changeFrame=new JFrame("Change");
+       changeFrame.setResizable(false);
+       changeFrame.setSize(350,350);
+       changeFrame.setLocationRelativeTo(null);
+       changeFrame.dispatchEvent(new WindowEvent(changeFrame, WindowEvent.WINDOW_CLOSING));
+       changePanel=new JPanel();
+       changeLabel=new JLabel("CHANGE: ");
+       changeDisplay=new JLabel("0.00");
+       changeDisplay.setFont(new Font("Courier New", Font.PLAIN,32));
+       changeDisplay.setForeground(Color.GREEN);
+       changeDisplay.setBackground(Color.BLACK);
+       changeDisplay.setOpaque(true);
+       changePanel.add(changeLabel);
+       changePanel.add(changeDisplay);
+       changeFrame.getContentPane().add(BorderLayout.NORTH,changePanel);
+       JButton saleComplete=new JButton("OK");
+       saleComplete.addActionListener(new SaleCompleteListener());
+       changeFrame.getContentPane().add(BorderLayout.SOUTH,saleComplete);
 
+       //Sandwich option GUI Code
+       sandwichPanel=new JPanel();
+       sandwichPanel.setLayout(gridBagLayout);
+       int tempValue=0;
+       int tempValue2=1;
        
-
+       JButton sBackButton=new JButton("Back");
+       sBackButton.addActionListener((ActionEvent ev) -> {
+           saladActive=false;
+           mainFrame.remove(sandwichPanel);
+           mainFrame.getContentPane().add(BorderLayout.SOUTH,orderPanel);
+           mainFrame.getContentPane().add(BorderLayout.NORTH,salePanel);
+           mainFrame.getContentPane().add(BorderLayout.CENTER,buttonPanel);
+           mainFrame.repaint();
+           mainFrame.revalidate();
+       });
        
+       gbc.gridx=0;
+       gbc.gridy=0;
+       sandwichPanel.add(sBackButton,gbc);
        
+       for (int i=0;i<sandwichList.size();++i)
+       {
+           JButton component=new JButton((String)sandwichList.get(i));
+           component.addActionListener(this);
+           
+           if (tempValue2==4)
+           {
+               ++tempValue;
+               tempValue2=0;
+           }
+           
+           gbc.gridx=tempValue;
+           gbc.gridy=tempValue2;
+           sandwichPanel.add(component,gbc);
+           ++tempValue2;
+       }
        
-       
-
     }
     
     public void actionPerformed(ActionEvent ev)
     {
         String item=ev.getActionCommand();
         String itemPrice=(String)itemPrices.get(item);
-        dlm.addElement(item+"-"+itemPrice);
-        orderList.setModel(dlm);
+        
+        if (saladActive==true)
+        {   
+            double priceIncrease=Double.parseDouble(itemPrice)+1;
+            itemPrice=String.format("%.2f",priceIncrease);
+            dlm.addElement(item+"-"+itemPrice);
+            orderList.setModel(dlm);
+        }
+        else
+        {
+            dlm.addElement(item+"-"+itemPrice);
+            orderList.setModel(dlm);
+        }
     }
             
     public class cancelListener implements ActionListener
@@ -336,6 +436,46 @@ public class Sale implements ActionListener{
             mainFrame.dispose();
             POS pos=new POS();
             pos.go();
+        }
+    }
+    
+    public class SandwichListener implements ActionListener
+    {
+        public void actionPerformed(ActionEvent ev)
+        {
+            mainFrame.remove(salePanel);
+            mainFrame.remove(buttonPanel);
+            mainFrame.getContentPane().add(BorderLayout.CENTER,sandwichPanel);
+            mainFrame.repaint();
+            mainFrame.revalidate();
+        }
+    }
+    
+    public class SaladListener implements ActionListener
+    {
+        public void actionPerformed(ActionEvent ev)
+        {
+            mainFrame.remove(salePanel);
+            mainFrame.remove(buttonPanel);
+            mainFrame.getContentPane().add(BorderLayout.CENTER,sandwichPanel);
+            mainFrame.repaint();
+            mainFrame.revalidate();
+            saladActive=true;
+        }
+    }
+    
+    public class CashListener implements ActionListener
+    {
+        public void actionPerformed(ActionEvent ev)
+        {
+            double amountEntered=Double.parseDouble(enteredAmount.getText());
+            double totalAmount=Double.parseDouble(totalDisplay.getText());
+            
+            double change=amountEntered-totalAmount;
+            
+            changeDisplay.setText(String.format("%.2f",change));
+            
+            changeFrame.setVisible(true);
         }
     }
     
@@ -351,6 +491,11 @@ public class Sale implements ActionListener{
             mainFrame.getContentPane().add(BorderLayout.CENTER,buttonPanel);
             mainFrame.repaint();
             mainFrame.revalidate();
+            enteredAmount.setText("0.00");
+            clearButton.doClick();
+            shutdown=true;
+            transactionComplete=true;
+            
         }
     }
     
@@ -367,10 +512,14 @@ public class Sale implements ActionListener{
     {
         public void actionPerformed(ActionEvent ev)
         {   
-            Thread a=new Thread(new CalculateTotal());
+            a=new Thread(new CalculateTotal());
+            b=new Thread(new  CheckAmount());
+            shutdown=false;
+            transactionComplete=false;
             mainFrame.remove(orderPanel);
             mainFrame.remove(salePanel);
             mainFrame.remove(buttonPanel);
+            mainFrame.remove(sandwichPanel);
             mainFrame.getContentPane().add(BorderLayout.NORTH,chargePanel);
             tempPanel=new JPanel();
             tempPanel.setLayout(new BoxLayout(tempPanel,BoxLayout.Y_AXIS));
@@ -380,31 +529,212 @@ public class Sale implements ActionListener{
             mainFrame.repaint();
             mainFrame.revalidate();
             a.start(); //run thread to calculate total amount to display 
-
+            b.start(); //run thread to check when transaction is done, and if
+                      //entered amount is sufficient
+        }
+    }
+    
+    public class CheckAmount implements Runnable
+    {
+        public synchronized void run()
+        {
+            while(!transactionComplete)
+            {
+                Double enteredPrice=Double.parseDouble(enteredAmount.getText());
+                Double total=Double.parseDouble(totalDisplay.getText());
+                if (total != 0 && enteredPrice>=total)
+                {
+                    cashButton.setEnabled(true);
+                }
+                else
+                {
+                    cashButton.setEnabled(false);
+                }
+            }
         }
     }
     
     //Class for calculating the total price
     public class CalculateTotal implements Runnable
     {
-        public void run()
+        public synchronized void run()
         {   
-            ListModel model=orderList.getModel();
-            int numItems=orderList.getModel().getSize();
-            total=0;
+            while(!shutdown){
+            try{
+                ListModel model=orderList.getModel();
+                int numItems=orderList.getModel().getSize();
+                total=0;
             
             
-            for (int i=0;i<numItems;++i)
-            {   
-                String temp=(String)model.getElementAt(i);
-                String []itemAndPrice=temp.split("-");
-                double temp2=Double.parseDouble((String)itemPrices.get(itemAndPrice[0]));
-                total=total+temp2;
+                for (int i=0;i<numItems;++i)
+                {   
+                    String temp=(String)model.getElementAt(i);
+                    String []itemAndPrice=temp.split("-");
+                    double temp2=Double.parseDouble(itemAndPrice[1]);
+
+                    total=total+temp2;
+                }
+            
+                String amountToDisplay=String.format("%.2f",total);
+                totalDisplay.setText(amountToDisplay);
+                ceilButton.setText("$"+String.valueOf((int)Math.ceil(total)));
+                } catch (Exception ex)
+                {
+                    ex.printStackTrace();
+                }
+            }
+        }
+    }
+    
+    public class FiveListener implements ActionListener
+    {
+        public void actionPerformed(ActionEvent ev)
+        {
+            enteredAmount.setText("5.00");
+        }
+    }
+    
+    public class ExactListener implements ActionListener
+    {   
+        public void actionPerformed(ActionEvent ev)
+        {
+            enteredAmount.setText(totalDisplay.getText());
+            changeFrame.setVisible(true);
+            transactionComplete=true;
+            dlm.removeAllElements();
+            orderList.setModel(dlm);
+            changeFrame.dispose();
+            chargeCancel.doClick();
+        }
+    }
+    
+    public class CeilListener implements ActionListener
+    {
+        public void actionPerformed(ActionEvent ev)
+        {   
+            double setText=(Math.ceil(Double.parseDouble(totalDisplay.getText())));
+            String amount=String.format("%.2f",setText);
+            enteredAmount.setText(amount);
+        }
+    }
+    
+    public class TenListener implements ActionListener
+    {
+        public void actionPerformed(ActionEvent ev)
+        {
+            enteredAmount.setText("10.00");
+        }
+    }
+    
+    public class TwentyListener implements ActionListener
+    {
+        public void actionPerformed(ActionEvent ev)
+        {
+            enteredAmount.setText("20.00");
+        }
+    }
+    
+    public class ClearListener implements ActionListener
+    {
+        public void actionPerformed(ActionEvent ev)
+        {
+            enteredAmount.setText("0.00");
+            for (int i=0;i<10;++i)
+            {
+                amount[i]=null;
             }
             
-            String amountToDisplay=String.format("%.2f",total);
-            totalDisplay.setText(amountToDisplay);
-            ceilButton.setText("$"+String.valueOf((int)Math.ceil(total)));
+            cashButton.setEnabled(false);
+        }
+    }
+    
+    public class SaleCompleteListener implements ActionListener
+    {
+         public void actionPerformed(ActionEvent ev)
+         {
+             changeFrame.dispose();
+             chargeCancel.doClick();
+             dlm.removeAllElements();
+             orderList.setModel(dlm);
+         }
+    }
+    
+    public class BackListener implements ActionListener
+    {
+        public void actionPerformed(ActionEvent ev)
+        {
+            String toDisplay="";
+            
+            if (amount[amount.length-1]==null)
+            {
+                return;
+            }
+            
+            for (int i=0;i<amount.length;++i)
+            {
+                if (amount[i]!=null)
+                {
+                    amount[i]=null;
+                    break;
+                }
+            }
+            
+            for (int i=0;i<10;++i)
+            {
+                if (amount[i]!=null)
+                {
+                    toDisplay=toDisplay+amount[i];
+                }
+            }
+            
+            toDisplay=new StringBuffer(toDisplay).reverse().toString();
+            
+            if(toDisplay.length()>2)
+            {
+                toDisplay=new StringBuilder(toDisplay).insert(toDisplay.length()-2, ".").toString();
+            }
+            else if (toDisplay.length()==0)
+            {
+                enteredAmount.setText("0.00");
+                return;
+            }
+            
+            enteredAmount.setText(toDisplay);
+        }
+    }
+    
+    public class NumberListener implements ActionListener
+    {
+        public void actionPerformed(ActionEvent ev)
+        {
+            String number=ev.getActionCommand();
+            String toDisplay="";
+            
+            for (int i=9;i>-1;--i)
+            {
+                if (amount[i]==null)
+                {
+                    amount[i]=number;
+                    break;
+                }
+            }
+            
+            for (int i=0;i<10;++i)
+            {
+                if (amount[i]!=null)
+                {
+                    toDisplay=toDisplay+amount[i];
+                }
+            }
+            
+            toDisplay=new StringBuffer(toDisplay).reverse().toString();
+            
+            if(toDisplay.length()>2)
+            {
+                toDisplay=new StringBuilder(toDisplay).insert(toDisplay.length()-2, ".").toString();
+            }
+            
+            enteredAmount.setText(toDisplay);
             
         }
     }

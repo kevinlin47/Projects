@@ -170,7 +170,7 @@ public class ManageItem {
             else
             {   
             
-               Connection conn=DriverManager.getConnection("jdbc:mysql://kevinlindb.cul7akmhbeku.us-west-2.rds.amazonaws.com:3306/posUsers_DB","root","password");
+               Connection conn=DriverManager.getConnection("jdbc:mysql://newkevinlindb.cul7akmhbeku.us-west-2.rds.amazonaws.com:3306/posUsers_DB","root","Restinpeace1");
                Statement st=conn.createStatement();
             
                String sqlStatment="INSERT INTO `posUsers_DB`.`items` (`itemname`, `itemprice`, `itemtype`) VALUES ('"+itemName+"', '"+itemPrice+"', '"+itemCategory+"')";
@@ -255,7 +255,7 @@ public class ManageItem {
                else
                {    
                    boolean found=false;
-                    Connection conn=DriverManager.getConnection("jdbc:mysql://kevinlindb.cul7akmhbeku.us-west-2.rds.amazonaws.com:3306/posUsers_DB","root","password");
+                    Connection conn=DriverManager.getConnection("jdbc:mysql://newkevinlindb.cul7akmhbeku.us-west-2.rds.amazonaws.com:3306/posUsers_DB","root","Restinpeace1");
                     Statement st=conn.createStatement();
                     ResultSet rs=st.executeQuery("Select * from items");
                     
