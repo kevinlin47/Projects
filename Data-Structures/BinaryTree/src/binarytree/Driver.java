@@ -21,6 +21,16 @@ public class Driver {
         
         System.out.println(myTree.search(0));
         System.out.println(myTree.search(19));
+        
+        if (myTree.isEmpty())
+        {
+            System.out.println("Binary Tree is empty");
+        }
+        else
+        {
+            System.out.println("Binary Tree is not empty");
+        }
+        
     }
     
 }
