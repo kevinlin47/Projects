@@ -18,6 +18,7 @@ public class Driver {
         myTree.insert(3);
         myTree.insert(19);
         myTree.insert(1995);
+        myTree.insert(1997);
         
         System.out.println(myTree.search(0));
         System.out.println(myTree.search(19));
@@ -30,6 +31,10 @@ public class Driver {
         {
             System.out.println("Binary Tree is not empty");
         }
+        
+        myTree.inOrder();
+        System.out.println();
+        myTree.remove(0);
         
     }
     

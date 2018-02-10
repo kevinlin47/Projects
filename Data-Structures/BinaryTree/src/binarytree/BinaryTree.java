@@ -124,4 +124,21 @@ public class BinaryTree {
         }
     }
     
+    public void remove(int d)
+    {
+        if (search(root,d))
+        {
+            root=remove(root,d);
+        }
+        else
+        {
+            System.out.println("Tree does not contain a node with the value "+d);
+        }
+    }
+    
+    private Node remove(Node head,int d)
+    {
+        return head;
+    }
+    
 }
