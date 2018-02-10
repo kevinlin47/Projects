@@ -144,7 +144,6 @@ public class BinaryTree {
             if (head.right==null && head.left==null)
             {
                 Node temp=getParent(root,head);
-                System.out.println(temp.getData());
             }
             //check to see if the node has two children
             else if (head.right!=null && head.left!=null)
@@ -157,7 +156,6 @@ public class BinaryTree {
                 if (head.right!=null)
                 {
                     Node temp=getParent(root,head);
-                    System.out.println(temp.getData());
                     
                     if (temp.left==head)
                     {
@@ -171,7 +169,6 @@ public class BinaryTree {
                 else 
                 {
                     Node temp=getParent(root,head);
-                    System.out.println(temp.getData());
                     
                     if (temp.left==head)
                     {
