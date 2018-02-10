@@ -35,6 +35,9 @@ public class Driver {
         myTree.inOrder();
         System.out.println();
         myTree.remove(0);
+        myTree.remove(3);
+        myTree.inOrder();
+        System.out.println();
         
     }
     

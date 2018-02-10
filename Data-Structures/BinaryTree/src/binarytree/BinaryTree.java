@@ -137,7 +137,21 @@ public class BinaryTree {
     }
     
     private Node remove(Node head,int d)
-    {
+    {   
+        if (head.getData()==d)
+        {   
+            Node temp=head.left;
+            Node pre=null;
+            while (temp.right!=null)
+            {   
+                pre=temp;
+                temp=temp.right;
+            }
+            head.setData(temp.getData());
+            pre.right=null;
+            
+        }
+                
         return head;
     }
     
