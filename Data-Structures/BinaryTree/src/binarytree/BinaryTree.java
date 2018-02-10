@@ -140,6 +140,50 @@ public class BinaryTree {
     {   
         if (head.getData()==d)
         {   
+            //check to see if it is a leaf node
+            if (head.right==null && head.left==null)
+            {
+                Node temp=getParent(root,head);
+                System.out.println(temp.getData());
+            }
+            //check to see if the node has two children
+            else if (head.right!=null && head.left!=null)
+            {
+                
+            }
+            //Otherwise node has one child
+            else
+            {
+                if (head.right!=null)
+                {
+                    Node temp=getParent(root,head);
+                    System.out.println(temp.getData());
+                    
+                    if (temp.left==head)
+                    {
+                        temp.left=head.right;
+                    }
+                    else
+                    {
+                        temp.right=head.right;
+                    }
+                }
+                else 
+                {
+                    Node temp=getParent(root,head);
+                    System.out.println(temp.getData());
+                    
+                    if (temp.left==head)
+                    {
+                        temp.left=head.left;
+                    }
+                    else
+                    {
+                        temp.right=head.left;
+                    }
+                }
+            }
+            /*
             Node temp=head.left;
             Node pre=null;
             while (temp.right!=null)
@@ -148,11 +192,49 @@ public class BinaryTree {
                 temp=temp.right;
             }
             head.setData(temp.getData());
-            pre.right=null;
-            
+            pre.right=null;*/
+         }
+        else
+        {
+            if (head.left!=null)
+            {
+                remove(head.left,d);
+            }
+            else
+            {
+                remove(head.right,d);
+            }
         }
                 
         return head;
     }
     
+    
+    private Node getParent(Node root,Node p)
+    {   
+        if (root==null || p==this.root)
+        {
+            return null;
+        }
+        else
+        {
+            if (root.left==p || root.right==p)
+            {
+                return root;
+            }
+            else
+            {   
+                if (root.left!=null)
+                {
+                    return getParent(root.left,p);
+                }
+                if (root.right!=null)
+                {
+                    return getParent(root.right,p);
+                }
+            }
+        }
+        
+        return null;
+    }
 }
