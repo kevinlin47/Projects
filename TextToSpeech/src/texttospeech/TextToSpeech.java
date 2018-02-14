@@ -8,13 +8,16 @@ import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.*;
+import java.io.*;
+import com.sun.speech.freetts.*;
 
 /**
  *
  * @author Kevin Lin
  */
 public class TextToSpeech {
-
+    
+    private static final String voiceName="kevin16";
     /**
      * @param args the command line arguments
      */
@@ -42,7 +45,7 @@ public class TextToSpeech {
         framePanel.add(scrollPane);
         JButton speakButton=new JButton("Speak");
         JButton clearButton=new JButton("Clear");
-        speakButton.addActionListener(new SpeakButtonListener());
+        speakButton.addActionListener(new SpeakButtonListener(textArea));
         clearButton.addActionListener(new ClearButtonListener(textArea));
         framePanel.add(speakButton);
         framePanel.add(clearButton);
@@ -69,10 +72,28 @@ public class TextToSpeech {
     }
     
     public class SpeakButtonListener implements ActionListener
-    {
+    {   
+        JTextArea textArea;
+        
+        SpeakButtonListener(JTextArea textArea)
+        {
+            this.textArea=textArea;
+        }
+        
         public void actionPerformed(ActionEvent ev)
         {
+            Voice voice;
+            VoiceManager vM=VoiceManager.getInstance();
+            voice=vM.getVoice(voiceName);
             
+            voice.allocate();
+            
+            try{
+                voice.speak(textArea.getText());
+            } catch(Exception ex)
+            {
+                ex.printStackTrace();
+            }
         }
     }
 
