@@ -35,9 +35,26 @@ public class Graph {
     }
     
     //Default Constructor
+    Graph()
+    {
+        this.v=1;
+        adjListArray=new ArrayList();
+        adjListArray.add(new LinkedList());
+    }
     
     public void addEdge(int src, int dest)
     {   
+        //If source node is larger or equal to amount of
+        //vertices need to add  new linked lists in
+        //the array list
+        if (src>=v)
+        {
+            for (int i=v;i<=src;++i)
+            {
+                adjListArray.add(new LinkedList());
+                ++v;
+            }
+        }
         //Create and edge between the source node
         //and the destination node
         adjListArray.get(src).addFirst(dest);
@@ -47,4 +64,17 @@ public class Graph {
         adjListArray.get(dest).addFirst(src);
     }
     
+    public void printGraph()
+    {
+        for (int i=0;i<v;++i)
+        {
+            System.out.println("Adjanceny list of vertext "+v);
+            System.out.print("head");
+            for (Integer nodeValue:adjListArray.get(i))
+            {
+                System.out.print(" -> "+nodeValue);
+            }
+            System.out.println("\n");
+        }
+    }
 }
