@@ -47,9 +47,10 @@ public class Graph {
         //If source node is larger or equal to amount of
         //vertices need to add  new linked lists in
         //the array list
-        if (src>=v)
-        {
-            for (int i=v;i<=src;++i)
+        if (src>=v || dest>=v)
+        {   
+            int larger= (src<dest)? dest:src;
+            for (int i=v;i<=larger;++i)
             {
                 adjListArray.add(new LinkedList());
                 ++v;

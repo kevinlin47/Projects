@@ -27,6 +27,17 @@ public class Driver {
             
             graph.printGraph();
             
+            //Test graph using default constructor
+            Graph graph2=new Graph();
+            graph2.addEdge(1,3);
+            graph2.addEdge(1,19);
+            
+            graph2.addEdge(3,5);
+            graph2.addEdge(3,4);
+            
+            graph2.addEdge(0,3);
+            
+            graph2.printGraph();
             
         }
         
