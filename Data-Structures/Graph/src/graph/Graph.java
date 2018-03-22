@@ -68,12 +68,9 @@ public class Graph {
     {
         for (int i=0;i<v;++i)
         {
-            System.out.println("Adjanceny list of vertext "+v);
+            System.out.println("Adjanceny list of vertext "+i);
             System.out.print("head");
-            for (Integer nodeValue:adjListArray.get(i))
-            {
-                System.out.print(" -> "+nodeValue);
-            }
+            adjListArray.get(i).forEach(e->System.out.print(" -> "+e));
             System.out.println("\n");
         }
     }
