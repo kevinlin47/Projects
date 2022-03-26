@@ -1,5 +1,6 @@
 package com.kevin.rest.webservices.restfulwebservices;
 
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -11,9 +12,14 @@ public class HelloWorldController {
 	//GET
 	//URI - /hello-world
 	//method - "Hello World"
-	@RequestMapping(method=RequestMethod.GET, path="/hello-world") 
+	@RequestMapping(method = RequestMethod.GET, path = "/hello-world") 
 	public String hellowWorld() {
 		return "Hello World";
+	}
+	
+	@GetMapping(path = "/hello-world-bean")
+	public HelloWorldBean helloWorldBean() {
+		return new HelloWorldBean("Hello World");
 	}
 
 }
