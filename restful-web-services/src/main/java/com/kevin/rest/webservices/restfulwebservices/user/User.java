@@ -36,7 +36,11 @@ public class User {
 	public String toString() {
 		return "User [id=" + id + ", name=" + name + ", birthDate=" + birthDate + "]";
 	}
-
+	
+	public User() {
+		
+	}
+	
 	public User(Integer id, String name, Date birthDate) {
 		super();
 		this.id = id;
