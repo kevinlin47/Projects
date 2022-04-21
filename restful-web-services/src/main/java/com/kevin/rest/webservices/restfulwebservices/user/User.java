@@ -10,6 +10,7 @@ import javax.persistence.OneToMany;
 import javax.validation.constraints.Past;
 import javax.validation.constraints.Size;
 
+
 @Entity
 public class User {
 	
